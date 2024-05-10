@@ -16,7 +16,7 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
             os.makedirs(path)
             # print("The new directory is created!")
         type_sets = glob.glob(path_orginal+'/*/')
-        for type in type_sets:
+        for type in tqdm(type_sets):
             path_type = type
             path_type_new = path_type.replace('mvtec', 'mvtec_'+type_cor)
             path_type_new = path_type_new.replace('/kaggle/input', '.')
