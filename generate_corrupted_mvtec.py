@@ -17,13 +17,8 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
         type_sets = glob.glob(path_orginal+'/*/')
         for type in type_sets:
             path_type = type
-            print('====')
-            print(path_type)
             path_type_new = path_type.replace('mvtec', 'mvtec_'+type_cor)
-            print(path_type_new)
             path_type_new = path_type_new.replace('/kaggle/input', '.')
-            print(path_type_new)
-            print('====')
             isExist = os.path.exists(path_type_new)
             if not isExist:
                 os.makedirs(path_type_new)
@@ -36,6 +31,6 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
                 image = np.array(image)
                 corrupted = corrupt(image, corruption_name=type_cor, severity=3)
                 im = Image.fromarray(corrupted)
-                print(path_to_image.replace('mvtec', 'mvtec_'+type_cor))
-                im.save(path_to_image.replace('mvtec', 'mvtec_'+type_cor))
+                print(path_to_image.replace('mvtec', 'mvtec_'+type_cor).replace('/kaggle/input', '.'))
+                im.save(path_to_image.replace('mvtec', 'mvtec_'+type_cor).replace('/kaggle/input', '.'))
 
