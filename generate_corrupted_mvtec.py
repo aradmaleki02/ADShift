@@ -14,7 +14,7 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
         isExist = os.path.exists(path)
         if not isExist:
             os.makedirs(path)
-            print("The new directory is created!")
+            # print("The new directory is created!")
         type_sets = glob.glob(path_orginal+'/*/')
         for type in type_sets:
             path_type = type
@@ -23,7 +23,7 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
             isExist = os.path.exists(path_type_new)
             if not isExist:
                 os.makedirs(path_type_new)
-                print("The new directory is created!")
+                # print("The new directory is created!")
             image_names = glob.glob(path_type + '/*.png')
             for image_name in image_names:
                 path_to_image = image_name
