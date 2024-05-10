@@ -4,10 +4,11 @@ import glob
 from PIL import Image
 from imagecorruptions import corrupt
 import numpy as np
+from tqdm import tqdm
 item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'grid', 'pill',
              'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper', 'tile', 'wood']
 for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
-    for _class_ in item_list:
+    for _class_ in tqdm(item_list):
         path_orginal = '/kaggle/input/mvtec-ad/' + _class_ + '/' + 'test' #path to the test set of original mvtec
         path = './mvtec_'+type_cor+'/' + _class_ + '/' + 'test' #path to the corrupted mvtec 
         isExist = os.path.exists(path)
@@ -26,11 +27,9 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
             image_names = glob.glob(path_type + '/*.png')
             for image_name in image_names:
                 path_to_image = image_name
-                print(path_to_image)
                 image = Image.open(path_to_image)
                 image = np.array(image)
                 corrupted = corrupt(image, corruption_name=type_cor, severity=3)
                 im = Image.fromarray(corrupted)
-                print(path_to_image.replace('mvtec', 'mvtec_'+type_cor).replace('/kaggle/input', '.'))
                 im.save(path_to_image.replace('mvtec', 'mvtec_'+type_cor).replace('/kaggle/input', '.'))
 
