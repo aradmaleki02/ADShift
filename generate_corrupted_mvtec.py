@@ -8,7 +8,7 @@ item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'gri
              'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper', 'tile', 'wood']
 for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
     for _class_ in item_list:
-        path_orginal = './mvtec/' + _class_ + '/' + 'test' #path to the test set of original mvtec
+        path_orginal = '/kaggle/input/mvtec-ad' + _class_ + '/' + 'test' #path to the test set of original mvtec
         path = './mvtec_'+type_cor+'/' + _class_ + '/' + 'test' #path to the corrupted mvtec 
         isExist = os.path.exists(path)
         if not isExist:
@@ -31,5 +31,6 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
                 image = np.array(image)
                 corrupted = corrupt(image, corruption_name=type_cor, severity=3)
                 im = Image.fromarray(corrupted)
+                print(path_to_image.replace('mvtec', 'mvtec_'+type_cor))
                 im.save(path_to_image.replace('mvtec', 'mvtec_'+type_cor))
 
