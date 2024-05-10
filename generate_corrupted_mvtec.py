@@ -15,6 +15,10 @@ for type_cor in ['brightness','contrast','defocus_blur','gaussian_noise']:
             os.makedirs(path)
             print("The new directory is created!")
         type_sets = glob.glob(path_orginal+'/*/')
+        print('=====')
+        print(path_orginal)
+        print(path)
+        print(len(type_sets))
         for type in type_sets:
             path_type = type
             path_type_new = path_type.replace('mvtec', 'mvtec_'+type_cor)
