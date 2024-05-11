@@ -14,10 +14,10 @@ def test_mvtec(_class_, epoch, backbone, image_size):
     data_transform, gt_transform = get_data_transforms(256, 256)
 
     # load data
-    test_data1 = MVTEC(root='./mvtec_anomaly_detection', train=False, transform=data_transform, category=_class_,
+    test_data1 = MVTEC(root='/kaggle/input/mvtec-ad', train=False, transform=data_transform, category=_class_,
                        resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
                        shrink_factor=1)
-    test_data2 = MVTEC(root='./mvtec_anomaly_detection', train=False, transform=data_transform, category=_class_,
+    test_data2 = MVTEC(root='/kaggle/input/mvtec-ad', train=False, transform=data_transform, category=_class_,
                        resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
                        shrink_factor=0.9)
 
