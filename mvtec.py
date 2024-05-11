@@ -122,7 +122,7 @@ class MVTEC(data.Dataset):
         image_file = self.image_files[index]
         image = Image.open(image_file)
         image = image.convert('RGB')
-        if self.transform is not None:
+        if self.transform is not None and self.train:
             image = self.transform(image)
         to_pil = transforms.ToPILImage()
         if not self.train:
@@ -150,6 +150,7 @@ class MVTEC(data.Dataset):
         #         print(f"imagenet30_img.size: {imagenet30_img.size}")
         #         print(f"img.size: {img.size}")
         image = center_paste(imagenet30_img, image)
+        image = self.transform(image)
 
         to_trans = transforms.ToTensor()
         image = to_trans(image)
