@@ -105,15 +105,15 @@ def evaluation_ATTA(encoder, bn, decoder, dataloader,device, type_of_test, img_s
 
     with torch.no_grad():
         for sample in dataloader:
-            img, label = sample[0], sample[1]
+            img, label = sample[0], sample[2]
 
-            if dataset_name != 'mvtec' and dataset_name != 'mvtec_ood':
-                if int(label) != _class_:
-                    label = 1
-                else:
-                    label = 0
-            else:
-                label = int(torch.sum(label) != 0)
+            # if dataset_name != 'mvtec' and dataset_name != 'mvtec_ood':
+            #     if int(label) != _class_:
+            #         label = 1
+            #     else:
+            #         label = 0
+            # else:
+            #     label = int(torch.sum(label) != 0)
 
 
             if img.shape[1] == 1:
