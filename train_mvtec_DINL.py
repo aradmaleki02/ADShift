@@ -151,7 +151,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
         if (epoch + 1) % save_step == 0:
             print('epoch: ', epoch + 1)
             ckp_path = cp_path + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
-            Path(ckp_path).mkdir(exist_ok=True)
+            Path(cp_path).mkdir(exist_ok=True)
 
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
