@@ -41,8 +41,7 @@ def test_mvtec(_class_, epoch, backbone, image_size, cp_path):
     decoder = decoder.to(device)
 
     # load checkpoint
-    ckp_path = cp_path + 'mvtec_DINL_' + str(_class_) + f'_{epoch - 1}.pth'
-    ckp = torch.load(ckp_path)
+    ckp = torch.load(cp_path)
     for k, v in list(ckp['bn'].items()):
         if 'memory' in k:
             ckp['bn'].pop(k)
