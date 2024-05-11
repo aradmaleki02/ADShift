@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 from dataset import AugMixDatasetMVTec
 import argparse
 from tqdm import tqdm
+import os
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -57,9 +58,9 @@ def loss_concat(a, b):
     return loss
 
 
-def train(_class_, backbone, batch_size, epochs):
+def train(_class_, backbone, batch_size, epochs, save_step):
     print(_class_)
-    epochs = 20
+    epochs = epochs
     learning_rate = 0.005
     batch_size = batch_size
     image_size = 224
@@ -136,8 +137,9 @@ def train(_class_, backbone, batch_size, epochs):
             optimizer.step()
             loss_list.append(loss.item())
 
-        if (epoch + 1) % 20 == 0 :
+        if (epoch + 1) % save_step == 0 :
             ckp_path = './checkpoints/' + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
+            os.makedirs()
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
         
@@ -151,6 +153,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--save_step', type=int, default=20)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
 
     args = parser.parse_args()
@@ -158,4 +161,4 @@ if __name__ == '__main__':
     item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
                   'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
     for i in item_list:
-        train(i, args.backbone, args.batch_size, args.epochs)
+        train(i, args.backbone, args.batch_size, args.epochs, args.save_step)
