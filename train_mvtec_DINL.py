@@ -163,10 +163,10 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
                         'decoder': decoder.state_dict()}, ckp_path)
 
             arguments_to_pass = [
-                '--epochs', epoch + 1,
-                '--image_size', image_size,
-                '--backbone', backbone,
-                '--cp_path', ckp_path
+                '--epochs', str(epoch + 1),
+                '--image_size', str(image_size),
+                '--backbone', str(backbone),
+                '--cp_path', str(ckp_path)
             ]
 
             result = subprocess.run(["python", "eval.py"] + arguments_to_pass, capture_output=True, text=True)
