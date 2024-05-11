@@ -169,7 +169,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
                 '--cp_path', str(ckp_path)
             ]
 
-            result = subprocess.run(["python", "eval.py"] + arguments_to_pass, capture_output=True, text=True)
+            result = subprocess.run(["python", "inference_mvtec_ATTA.py"] + arguments_to_pass, capture_output=True, text=True)
 
             # Check the result
             if result.returncode == 0:
