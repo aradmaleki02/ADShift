@@ -177,6 +177,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=8)
+    print(parser)
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--save_step', type=int, default=20)
     parser.add_argument('--image_size', type=int, default=256)
