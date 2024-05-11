@@ -191,11 +191,11 @@ if __name__ == '__main__':
     parser.add_argument('--image_size', type=int, default=256)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
     parser.add_argument('--cp_path', type=str, default='./checkpoints/')
+    parser.add_argument('--clazz', type=str, default='carpet')
 
     args = parser.parse_args()
 
     print('!!!')
     item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
                  'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
-    for i in item_list:
-        train(i, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
+    train(args.clazz, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
