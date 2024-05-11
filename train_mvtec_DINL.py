@@ -155,7 +155,6 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
             loss_list.append(loss.item())
 
         if (epoch + 1) % save_step == 0:
-            print('epoch: ', epoch + 1)
             ckp_path = cp_path + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
             Path(cp_path).mkdir(exist_ok=True)
 
@@ -169,7 +168,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
                 '--cp_path', str(ckp_path)
             ]
 
-            result = subprocess.run(["python", "inference_mvtec_ATTA.py"] + arguments_to_pass, capture_output=True, text=True)
+            result = subprocess.run(["python", "inference_mvtec_ATTA.py"] + arguments_to_pass, capture_output=False, text=True)
 
             # Check the result
             if result.returncode == 0:
