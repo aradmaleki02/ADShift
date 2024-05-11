@@ -1,14 +1,16 @@
 import torch
 from torchvision.datasets import ImageFolder
+
+from mvtec import MVTEC
 from resnet import wide_resnet50_2, resnet18
 from de_resnet import de_wide_resnet50_2, de_resnet18
 from torch.nn import functional as F
 import torchvision.transforms as transforms
-from dataset import AugMixDatasetMVTec
+from dataset import AugMixDatasetMVTec, get_data_transforms
 import argparse
 from tqdm import tqdm
 import os
-import shutil
+from inference_mvtec_ATTA import evaluation_ATTA
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -88,6 +90,18 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
     train_data = AugMixDatasetMVTec(train_data, preprocess)
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
+    data_transform, gt_transform = get_data_transforms(image_size, image_size)
+
+    test_data1 = MVTEC(root='/kaggle/input/mvtec-ad', train=False, transform=data_transform, category=_class_,
+                       resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
+                       shrink_factor=1)
+    test_data2 = MVTEC(root='/kaggle/input/mvtec-ad', train=False, transform=data_transform, category=_class_,
+                       resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
+                       shrink_factor=0.9)
+
+    test_dataloader1 = torch.utils.data.DataLoader(test_data1, batch_size=1, shuffle=False)
+    test_dataloader2 = torch.utils.data.DataLoader(test_data2, batch_size=1, shuffle=False)
+
     if backbone == 'wide':
         encoder, bn = wide_resnet50_2(pretrained=True)
         decoder = de_wide_resnet50_2(pretrained=False)
@@ -139,6 +153,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
             loss_list.append(loss.item())
 
         if (epoch + 1) % save_step == 0 :
+            print('epoch: ', epoch + 1)
             ckp_path = './checkpoints/' + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
             try:
                 os.makedirs('./checkpoints')
@@ -146,6 +161,21 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
                 pass
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
+
+            lamda = 0.5
+            list_results = []
+            auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader1, device,
+                                       type_of_test='EFDM_test',
+                                       img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
+            list_results.append(round(auroc_sp, 4))
+            print('main Auroc{:.4f}'.format(auroc_sp))
+            auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader2, device,
+                                       type_of_test='EFDM_test',
+                                       img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
+            list_results.append(round(auroc_sp, 4))
+            print('shifted Auroc{:.4f}'.format(auroc_sp))
+
+            print(list_results)
         
 
 
