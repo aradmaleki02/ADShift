@@ -77,7 +77,7 @@ for i in item_list:
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--image_size', type=int, default=256)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
-    parser.add_argument('cp_path', type=str, default='./checkpoints/')
+    parser.add_argument('--cp_path', type=str, default='./checkpoints/')
 
     args = parser.parse_args()
     test_mvtec(i, args.epochs, args.backbone, args.image_size, args.cp_path)

@@ -11,10 +11,11 @@ import argparse
 from tqdm import tqdm
 import os
 from inference_mvtec_ATTA import evaluation_ATTA
+from pathlib import Path
+
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
 
 
 def loss_fucntion(a, b):
@@ -29,6 +30,7 @@ def loss_fucntion(a, b):
                                         b[item].view(b[item].shape[0], -1)))
     return loss
 
+
 def loss_fucntion_last(a, b):
     mse_loss = torch.nn.MSELoss()
     cos_loss = torch.nn.CosineSimilarity()
@@ -41,7 +43,6 @@ def loss_fucntion_last(a, b):
     loss += torch.mean(1 - cos_loss(a[item].view(a[item].shape[0], -1),
                                     b[item].view(b[item].shape[0], -1)))
     return loss
-
 
 
 def loss_concat(a, b):
@@ -61,17 +62,15 @@ def loss_concat(a, b):
     return loss
 
 
-def train(_class_, backbone, batch_size, epochs, save_step, image_size):
+def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path):
     print(_class_)
     epochs = epochs
     learning_rate = 0.005
     batch_size = batch_size
     image_size = image_size
 
-
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(device)
-
 
     resize_transform = transforms.Compose([
         transforms.Resize((image_size, image_size)),
@@ -84,8 +83,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
                              std=std_train),
     ])
 
-
-    train_path = '/kaggle/input/mvtec-ad/' + _class_ + '/train' #update here
+    train_path = '/kaggle/input/mvtec-ad/' + _class_ + '/train'  # update here
     train_data = ImageFolder(root=train_path, transform=resize_transform)
     train_data = AugMixDatasetMVTec(train_data, preprocess)
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
@@ -117,8 +115,6 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
     optimizer = torch.optim.Adam(list(decoder.parameters()) + list(bn.parameters()), lr=learning_rate,
                                  betas=(0.5, 0.999))
 
-
-
     for epoch in tqdm(range(epochs)):
         bn.train()
         decoder.train()
@@ -127,8 +123,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
             normal = normal.to(device)
             inputs_normal = encoder(normal)
             bn_normal = bn(inputs_normal)
-            outputs_normal = decoder(bn_normal)  
-
+            outputs_normal = decoder(bn_normal)
 
             augmix_img = augmix_img.to(device)
             inputs_augmix = encoder(augmix_img)
@@ -142,23 +137,22 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
             loss_bn = loss_fucntion([bn_normal], [bn_augmix]) + loss_fucntion([bn_normal], [bn_gray])
             outputs_gray = decoder(bn_gray)
 
-            loss_last = loss_fucntion_last(outputs_normal, outputs_augmix) + loss_fucntion_last(outputs_normal, outputs_gray)
+            loss_last = loss_fucntion_last(outputs_normal, outputs_augmix) + loss_fucntion_last(outputs_normal,
+                                                                                                outputs_gray)
 
             loss_normal = loss_fucntion(inputs_normal, outputs_normal)
-            loss = loss_normal*0.9 + loss_bn*0.05 + loss_last*0.05
+            loss = loss_normal * 0.9 + loss_bn * 0.05 + loss_last * 0.05
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             loss_list.append(loss.item())
 
-        if (epoch + 1) % save_step == 0 :
+        if (epoch + 1) % save_step == 0:
             print('epoch: ', epoch + 1)
-            ckp_path = './checkpoints/' + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
-            try:
-                os.makedirs('./checkpoints')
-            except:
-                pass
+            ckp_path = cp_path + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
+            Path(ckp_path).mkdir(exist_ok=True)
+
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
 
@@ -176,9 +170,6 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size):
             print('shifted Auroc{:.4f}'.format(auroc_sp))
 
             print(list_results)
-        
-
-
 
     return
 
@@ -190,10 +181,12 @@ if __name__ == '__main__':
     parser.add_argument('--save_step', type=int, default=20)
     parser.add_argument('--image_size', type=int, default=256)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
+    parser.add_argument('--cp_path', type=str, default='./checkpoints')
 
     args = parser.parse_args()
 
+    print('!!!')
     item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
-                  'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
+                 'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
     for i in item_list:
-        train(i, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size)
+        train(i, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
