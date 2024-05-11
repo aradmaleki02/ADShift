@@ -92,7 +92,7 @@ class MVTEC(data.Dataset):
     def __init__(self, root, train=True,
                  transform=None,
                  category='carpet', resize=None, use_imagenet=False,
-                 select_random_image_from_imagenet=False, shrink_factor=0.9, shuffle=False, ratio=1, only_image=False):
+                 select_random_image_from_imagenet=False, shrink_factor=0.9, shuffle=False, ratio=1):
         self.root = root
         self.transform = transform
         self.image_files = []
@@ -110,7 +110,6 @@ class MVTEC(data.Dataset):
             self.resize = int(resize * shrink_factor)
         self.select_random_image_from_imagenet = select_random_image_from_imagenet
         self.imagenet30_testset = IMAGENET30_TEST_DATASET()
-        self.only_image = only_image
 
         if shuffle:
             random.seed(42)
@@ -139,8 +138,6 @@ class MVTEC(data.Dataset):
             target = 1
 
         if self.train:
-            if self.only_image:
-                return to_pil(image)
             return image, target
 
         if self.select_random_image_from_imagenet:
