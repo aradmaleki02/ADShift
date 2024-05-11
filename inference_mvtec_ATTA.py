@@ -81,7 +81,7 @@ if __name__ == '__main__':
     parser.add_argument('--clazz', type=str, default='carpet')
 
     args = parser.parse_args()
-    test_mvtec(i, args.epochs, args.backbone, args.image_size, args.cp_path)
+    test_mvtec(args.clazz, args.epochs, args.backbone, args.image_size, args.cp_path)
     print('===============================================')
     print('')
     print('')
