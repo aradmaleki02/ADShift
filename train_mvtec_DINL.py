@@ -91,7 +91,7 @@ def train(_class_, backbone, batch_size, epochs):
         decoder = de_wide_resnet50_2(pretrained=False)
     else:
         encoder, bn = resnet18(pretrained=True)
-        decoder = de_resnet18(pretrained=True)
+        decoder = de_resnet18(pretrained=False)
     encoder = encoder.to(device)
     bn = bn.to(device)
     encoder.eval()
