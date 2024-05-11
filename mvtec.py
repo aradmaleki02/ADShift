@@ -149,8 +149,6 @@ class MVTEC(data.Dataset):
         image = center_paste(imagenet30_img, image)
         image = self.transform(image)
 
-        to_trans = transforms.ToTensor()
-        image = to_trans(image)
         gt = torch.zeros([1, image.size()[-2], image.size()[-2]])
         gt[:, :, 1:3] = 1
 
