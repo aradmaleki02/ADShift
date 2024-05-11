@@ -49,13 +49,13 @@ def test_mvtec(_class_, epoch, backbone, image_size, cp_path):
     list_results = []
     auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader1, device,
                                type_of_test='EFDM_test',
-                               img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
+                               img_size=image_size, lamda=lamda, dataset_name='brain', _class_=_class_)
     list_results.append(round(auroc_sp, 4))
     print('main Auroc{:.4f}'.format(auroc_sp))
 
     auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader2, device,
                                type_of_test='EFDM_test',
-                               img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
+                               img_size=image_size, lamda=lamda, dataset_name='brain', _class_=_class_)
     list_results.append(round(auroc_sp, 4))
     print('shifted Auroc{:.4f}'.format(auroc_sp))
 

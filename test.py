@@ -67,6 +67,10 @@ def evaluation_ATTA(encoder, bn, decoder, dataloader,device, type_of_test, img_s
         link_to_normal_sample = '/kaggle/input/mvtec-ad/' + _class_ + '/train/good/000.png' #update the link here
         normal_image = Image.open(link_to_normal_sample).convert("RGB")
 
+    if dataset_name == 'brain':
+        link_to_normal_sample = '/kaggle/input/brain-tumor-detection/no/No12.jpg'
+        normal_image = Image.open(link_to_normal_sample).convert('RGB')
+
     if dataset_name == 'PACS':
         labels_dict = {
             0: 'dog',
