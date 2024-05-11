@@ -131,6 +131,7 @@ class MVTEC(data.Dataset):
         image = image.convert('RGB')
         if self.transform is not None and self.train:
             image = self.transform(image)
+        to_pil = transforms.ToPILImage()
 
         if os.path.dirname(image_file).endswith("good"):
             target = 0
@@ -139,7 +140,7 @@ class MVTEC(data.Dataset):
 
         if self.train:
             if self.only_image:
-                return image
+                return to_pil(image)
             return image, target
 
         if self.select_random_image_from_imagenet:
@@ -161,8 +162,6 @@ class MVTEC(data.Dataset):
         gt = torch.zeros([1, image.size()[-2], image.size()[-2]])
         gt[:, :, 1:3] = 1
 
-        if self.only_image:
-            return image
         return image, gt, target, f'{self.train}_{index}'
 
     def __len__(self):
