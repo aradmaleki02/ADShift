@@ -165,7 +165,8 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
                 '--epochs', str(epoch + 1),
                 '--image_size', str(image_size),
                 '--backbone', str(backbone),
-                '--cp_path', str(ckp_path)
+                '--cp_path', str(ckp_path),
+                '--clazz', _class_
             ]
 
             result = subprocess.run(["python", "inference_mvtec_ATTA.py"] + arguments_to_pass, capture_output=False, text=True)
