@@ -162,7 +162,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
                 '--clazz', _class_
             ]
 
-            result = subprocess.run(["python", "eval_brain.py"] + arguments_to_pass, capture_output=False, text=True)
+            result = subprocess.run(["python", "eval_waterbirds.py"] + arguments_to_pass, capture_output=False, text=True)
 
             # Check the result
             if result.returncode == 0:
@@ -188,4 +188,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    train('brain', args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
+    train('waterbirds', args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
