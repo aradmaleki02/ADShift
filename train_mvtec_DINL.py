@@ -181,7 +181,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_step', type=int, default=20)
     parser.add_argument('--image_size', type=int, default=256)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
-    parser.add_argument('--cp_path', type=str, default='./checkpoints')
+    parser.add_argument('--cp_path', type=str, default='./checkpoints/')
 
     args = parser.parse_args()
 
