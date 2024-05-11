@@ -124,9 +124,6 @@ class MVTEC(data.Dataset):
         image = image.convert('RGB')
         if self.transform is not None and self.train:
             image = self.transform(image)
-        to_pil = transforms.ToPILImage()
-        if not self.train:
-            image = to_pil(image)
 
         if os.path.dirname(image_file).endswith("good"):
             target = 0
