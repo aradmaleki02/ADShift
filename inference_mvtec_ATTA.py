@@ -69,18 +69,20 @@ def test_mvtec(_class_, epoch, backbone, image_size, cp_path):
     return
 
 
-item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
-             'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
+if __name__ == '__main__':
 
-for i in item_list:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--epochs', type=int, default=20)
-    parser.add_argument('--image_size', type=int, default=256)
-    parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
-    parser.add_argument('--cp_path', type=str, default='./checkpoints/')
+    item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
+                 'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
 
-    args = parser.parse_args()
-    test_mvtec(i, args.epochs, args.backbone, args.image_size, args.cp_path)
-    print('===============================================')
-    print('')
-    print('')
+    for i in item_list:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--epochs', type=int, default=20)
+        parser.add_argument('--image_size', type=int, default=256)
+        parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
+        parser.add_argument('--cp_path', type=str, default='./checkpoints/')
+
+        args = parser.parse_args()
+        test_mvtec(i, args.epochs, args.backbone, args.image_size, args.cp_path)
+        print('===============================================')
+        print('')
+        print('')

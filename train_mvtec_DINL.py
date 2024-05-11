@@ -174,21 +174,19 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
     return
 
 
-# if __name__ == '__main__':
-    # print('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--batch_size', type=int, default=8)
-    # print(parser)
-    # parser.add_argument('--epochs', type=int, default=20)
-    # parser.add_argument('--save_step', type=int, default=20)
-    # parser.add_argument('--image_size', type=int, default=256)
-    # parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
-    # parser.add_argument('--cp_path', type=str, default='./checkpoints')
-    #
-    # args = parser.parse_args()
-    #
-    # print('!!!')
-    # item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
-    #              'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
-    # for i in item_list:
-    #     train(i, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--save_step', type=int, default=20)
+    parser.add_argument('--image_size', type=int, default=256)
+    parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
+    parser.add_argument('--cp_path', type=str, default='./checkpoints')
+
+    args = parser.parse_args()
+
+    print('!!!')
+    item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
+                 'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
+    for i in item_list:
+        train(i, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size, args.cp_path)
