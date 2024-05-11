@@ -551,7 +551,7 @@ class BrainTest(torch.utils.data.Dataset):
         has_anomaly = 0 if self.test_label[idx] == 0 else 1
 
         # return img, , has_anomaly, img_path
-        return img, has_anomaly
+        return img, None, has_anomaly, img_path
 
 
 def prepare_br35h_dataset_files():
