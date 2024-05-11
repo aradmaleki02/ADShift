@@ -92,7 +92,7 @@ class MVTEC(data.Dataset):
     def __init__(self, root, train=True,
                  transform=None,
                  category='carpet', resize=None, use_imagenet=False,
-                 select_random_image_from_imagenet=False, shrink_factor=0.9, shuffle=False, ratio=1):
+                 select_random_image_from_imagenet=False, shrink_factor=0.9, shuffle=False, ratio=1, pad_train=False):
         self.root = root
         self.transform = transform
         self.image_files = []
@@ -110,13 +110,13 @@ class MVTEC(data.Dataset):
             self.resize = int(resize * shrink_factor)
         self.select_random_image_from_imagenet = select_random_image_from_imagenet
         self.imagenet30_testset = IMAGENET30_TEST_DATASET()
+        self.pad_train = pad_train
 
         if shuffle:
             random.seed(42)
             random.shuffle(self.image_files)
             sep = int(ratio * len(self.image_files))
             self.image_files = self.image_files[:sep]
-
 
     def __getitem__(self, index):
         """
@@ -137,7 +137,7 @@ class MVTEC(data.Dataset):
         else:
             target = 1
 
-        if self.train:
+        if self.train and not self.pad_train:
             return image, target
 
         if self.select_random_image_from_imagenet:
@@ -154,6 +154,8 @@ class MVTEC(data.Dataset):
         #         print(f"imagenet30_img.size: {imagenet30_img.size}")
         #         print(f"img.size: {img.size}")
         image = center_paste(imagenet30_img, image)
+        if self.train:
+            return image, 0
         image = self.transform(image)
 
         gt = torch.zeros([1, image.size()[-2], image.size()[-2]])
