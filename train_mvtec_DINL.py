@@ -140,8 +140,10 @@ def train(_class_, backbone, batch_size, epochs, save_step):
 
         if (epoch + 1) % save_step == 0 :
             ckp_path = './checkpoints/' + 'mvtec_DINL_' + str(_class_) + '_' + str(epoch) + '.pth'
-            shutil.rmtree('./checkpoints')
-            os.makedirs('./checkpoints')
+            try:
+                os.makedirs('./checkpoints')
+            except:
+                pass
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
         
