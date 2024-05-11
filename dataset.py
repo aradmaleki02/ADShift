@@ -641,3 +641,51 @@ def prepare_brats2015_dataset_files():
         shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/test/normal')
 
 
+class Waterbird(torch.utils.data.Dataset):
+    def __init__(self, root, df, transform, train=True, count_train_landbg=-1, count_train_waterbg=-1, mode='bg_all'):
+        self.transform = transform
+        self.train = train
+        self.df = df
+        lb_on_l = df[(df['y'] == 0) & (df['place'] == 0)]
+        lb_on_w = df[(df['y'] == 0) & (df['place'] == 1)]
+        self.normal_paths = []
+        self.labels = []
+
+        normal_df = lb_on_l.iloc[:count_train_landbg]
+        normal_df_np = normal_df['img_filename'].to_numpy()
+        self.normal_paths.extend([os.path.join(root, x) for x in normal_df_np][:count_train_landbg])
+        normal_df = lb_on_w.iloc[:count_train_waterbg]
+        normal_df_np = normal_df['img_filename'].to_numpy()
+        self.normal_paths.extend([os.path.join(root, x) for x in normal_df_np][:count_train_waterbg])
+
+        if train:
+            self.image_paths = self.normal_paths
+        else:
+            self.image_paths = []
+            if mode == 'bg_all':
+                dff = df
+            elif mode == 'bg_water':
+                dff = df[(df['place'] == 1)]
+            elif mode == 'bg_land':
+                dff = df[(df['place'] == 0)]
+            else:
+                print('Wrong mode!')
+                raise ValueError('Wrong bg mode!')
+            all_paths = dff[['img_filename', 'y']].to_numpy()
+            for i in range(len(all_paths)):
+                full_path = os.path.join(root, all_paths[i][0])
+                if full_path not in self.normal_paths:
+                    self.image_paths.append(full_path)
+                    self.labels.append(all_paths[i][1])
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        img_path = self.image_paths[idx]
+        img = Image.open(img_path).convert('RGB')
+        img = self.transform(img)
+        if self.train:
+            return img, 0
+        else:
+            return img, 1, self.labels[idx], 0
