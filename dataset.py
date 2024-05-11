@@ -1,3 +1,6 @@
+import shutil
+from pathlib import Path
+
 from torchvision import transforms
 from PIL import Image
 import os
@@ -494,5 +497,147 @@ class AugMixDatasetPACS(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.dataset)
+
+
+class BrainTrain(torch.utils.data.Dataset):
+    def __init__(self, transform):
+        self.transform = transform
+        self.image_paths = glob.glob('./Br35H/dataset/train/normal/*')
+        brats_mod = glob.glob('./brats/dataset/train/normal/*')
+        random.seed(1)
+        random_brats_images = random.sample(brats_mod, 50)
+        self.image_paths.extend(random_brats_images)
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        img_path = self.image_paths[idx]
+        img = Image.open(img_path).convert('RGB')
+        img = self.transform(img)
+        return img, 0
+
+
+class BrainTest(torch.utils.data.Dataset):
+    def __init__(self, transform, test_id=1):
+
+        self.transform = transform
+        self.test_id = test_id
+
+        test_normal_path = glob.glob('./Br35H/dataset/test/normal/*')
+        test_anomaly_path = glob.glob('./Br35H/dataset/test/anomaly/*')
+
+        self.test_path = test_normal_path + test_anomaly_path
+        self.test_label = [0] * len(test_normal_path) + [1] * len(test_anomaly_path)
+
+        if self.test_id == 2:
+            test_normal_path = glob.glob('./brats/dataset/test/normal/*')
+            test_anomaly_path = glob.glob('./brats/dataset/test/anomaly/*')
+
+            self.test_path = test_normal_path + test_anomaly_path
+            self.test_label = [0] * len(test_normal_path) + [1] * len(test_anomaly_path)
+
+    def __len__(self):
+        return len(self.test_path)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        img_path = self.test_path[idx]
+        img = Image.open(img_path).convert('RGB')
+        img = self.transform(img)
+
+        has_anomaly = 0 if self.test_label[idx] == 0 else 1
+
+        # return img, , has_anomaly, img_path
+        return img, has_anomaly
+
+
+def prepare_br35h_dataset_files():
+    normal_path35 = '/kaggle/input/brain-tumor-detection/no'
+    anomaly_path35 = '/kaggle/input/brain-tumor-detection/yes'
+
+    print(f"len(os.listdir(normal_path35)): {len(os.listdir(normal_path35))}")
+    print(f"len(os.listdir(anomaly_path35)): {len(os.listdir(anomaly_path35))}")
+
+    Path('./Br35H/dataset/test/anomaly').mkdir(parents=True, exist_ok=True)
+
+    flist = [f for f in os.listdir('./Br35H/dataset/test/anomaly')]
+    for f in flist:
+        os.remove(os.path.join('./Br35H/dataset/test/anomaly', f))
+
+    anom35 = os.listdir(anomaly_path35)
+    for f in anom35:
+        shutil.copy2(os.path.join(anomaly_path35, f), './Br35H/dataset/test/anomaly')
+
+
+    normal35 = os.listdir(normal_path35)
+    random.shuffle(normal35)
+    ratio = 0.7
+    sep = round(len(normal35) * ratio)
+
+    Path('./Br35H/dataset/test/normal').mkdir(parents=True, exist_ok=True)
+    Path('./Br35H/dataset/train/normal').mkdir(parents=True, exist_ok=True)
+
+    flist = [f for f in os.listdir('./Br35H/dataset/test/normal')]
+    for f in flist:
+        os.remove(os.path.join('./Br35H/dataset/test/normal', f))
+
+    flist = [f for f in os.listdir('./Br35H/dataset/train/normal')]
+    for f in flist:
+        os.remove(os.path.join('./Br35H/dataset/train/normal', f))
+
+    for f in normal35[:sep]:
+        shutil.copy2(os.path.join(normal_path35, f), './Br35H/dataset/train/normal')
+    for f in normal35[sep:]:
+        shutil.copy2(os.path.join(normal_path35, f), './Br35H/dataset/test/normal')
+
+
+import pandas as pd
+
+def prepare_brats2015_dataset_files():
+    labels = pd.read_csv('/kaggle/input/brain-tumor/Brain Tumor.csv')
+    labels = labels[['Image', 'Class']]
+    labels.tail() # 0: no tumor, 1: tumor
+
+    labels.head()
+
+    brats_path = '/kaggle/input/brain-tumor/Brain Tumor/Brain Tumor'
+    lbl = dict(zip(labels.Image, labels.Class))
+
+    keys = lbl.keys()
+    normalbrats = [x for x in keys if lbl[x] == 0]
+    anomalybrats = [x for x in keys if lbl[x] == 1]
+
+    Path('./brats/dataset/test/anomaly').mkdir(parents=True, exist_ok=True)
+    Path('./brats/dataset/test/normal').mkdir(parents=True, exist_ok=True)
+    Path('./brats/dataset/train/normal').mkdir(parents=True, exist_ok=True)
+
+    flist = [f for f in os.listdir('./brats/dataset/test/anomaly')]
+    for f in flist:
+        os.remove(os.path.join('./brats/dataset/test/anomaly', f))
+
+    flist = [f for f in os.listdir('./brats/dataset/test/normal')]
+    for f in flist:
+        os.remove(os.path.join('./brats/dataset/test/normal', f))
+
+    flist = [f for f in os.listdir('./brats/dataset/train/normal')]
+    for f in flist:
+        os.remove(os.path.join('./brats/dataset/train/normal', f))
+
+    ratio = 0.7
+    random.shuffle(normalbrats)
+    bratsep = round(len(normalbrats) * ratio)
+
+    for f in anomalybrats:
+        ext = f'{f}.jpg'
+        shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/test/anomaly')
+    for f in normalbrats[:bratsep]:
+        ext = f'{f}.jpg'
+        shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/train/normal')
+    for f in normalbrats[bratsep:]:
+        ext = f'{f}.jpg'
+        shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/test/normal')
 
 

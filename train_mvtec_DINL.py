@@ -94,10 +94,8 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
     padded = MVTEC(root='/kaggle/input/mvtec-ad', train=True, transform=resize_transform, category=_class_,
                    resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
                    shrink_factor=0.9, shuffle=True, ratio=0.05, pad_train=True)
-    print(len(train_data), len(padded))
 
     train_data = torch.utils.data.ConcatDataset([train_data, padded])
-    print(len(train_data))
 
     train_data = AugMixDatasetMVTec(train_data, preprocess)
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
