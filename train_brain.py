@@ -161,7 +161,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
                 '--clazz', _class_
             ]
 
-            result = subprocess.run(["python", "inference_mvtec_ATTA.py"] + arguments_to_pass, capture_output=False, text=True)
+            result = subprocess.run(["python", "eval_brain.py"] + arguments_to_pass, capture_output=False, text=True)
 
             # Check the result
             if result.returncode == 0:
