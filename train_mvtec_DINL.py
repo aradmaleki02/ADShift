@@ -1,8 +1,13 @@
+import subprocess
+
 import torch
 from torchvision.datasets import ImageFolder
 
 from mvtec import MVTEC
 from resnet import wide_resnet50_2, resnet18
+from resnet_TTA import wide_resnet50_2 as wide_TTA
+from resnet_TTA import resnet18 as res_TTA
+
 from de_resnet import de_wide_resnet50_2, de_resnet18
 from torch.nn import functional as F
 import torchvision.transforms as transforms
@@ -115,7 +120,8 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
     optimizer = torch.optim.Adam(list(decoder.parameters()) + list(bn.parameters()), lr=learning_rate,
                                  betas=(0.5, 0.999))
 
-    for epoch in tqdm(range(epochs)):
+    for epoch in (range(epochs)):
+        print(f'class: {_class_}, epoch: {epoch + 1}')
         bn.train()
         decoder.train()
         loss_list = []
@@ -156,20 +162,24 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
 
-            lamda = 0.5
-            list_results = []
-            auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader1, device,
-                                       type_of_test='EFDM_test',
-                                       img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
-            list_results.append(round(auroc_sp, 4))
-            print('main Auroc{:.4f}'.format(auroc_sp))
-            auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader2, device,
-                                       type_of_test='EFDM_test',
-                                       img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
-            list_results.append(round(auroc_sp, 4))
-            print('shifted Auroc{:.4f}'.format(auroc_sp))
+            arguments_to_pass = [
+                '--epochs', epoch + 1,
+                '--image_size', image_size,
+                '--backbone', backbone,
+                '--cp_path', ckp_path
+            ]
 
-            print(list_results)
+            result = subprocess.run(["python", "eval.py"] + arguments_to_pass, capture_output=True, text=True)
+
+            # Check the result
+            if result.returncode == 0:
+                print("Script executed successfully.")
+                print("Output:")
+                print(result.stdout)
+            else:
+                print("Script execution failed.")
+                print("Error:")
+                print(result.stderr)
 
     return
 
