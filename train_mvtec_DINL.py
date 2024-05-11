@@ -59,12 +59,12 @@ def loss_concat(a, b):
     return loss
 
 
-def train(_class_, backbone, batch_size, epochs, save_step):
+def train(_class_, backbone, batch_size, epochs, save_step, image_size):
     print(_class_)
     epochs = epochs
     learning_rate = 0.005
     batch_size = batch_size
-    image_size = 224
+    image_size = image_size
 
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -158,6 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--save_step', type=int, default=20)
+    parser.add_argument('--image_size', type=int, default=256)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
 
     args = parser.parse_args()
@@ -165,4 +166,4 @@ if __name__ == '__main__':
     item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
                   'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
     for i in item_list:
-        train(i, args.backbone, args.batch_size, args.epochs, args.save_step)
+        train(i, args.backbone, args.batch_size, args.epochs, args.save_step, args.image_size)

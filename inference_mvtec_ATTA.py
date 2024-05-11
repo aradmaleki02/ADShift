@@ -1,50 +1,47 @@
+import argparse
+
 import torch
 from dataset import get_data_transforms
-from resnet_TTA import  wide_resnet50_2
-from de_resnet import  de_wide_resnet50_2
-from dataset import MVTecDataset, MVTecDatasetOOD
-from test import  evaluation_ATTA
+from mvtec import MVTEC
+from resnet_TTA import wide_resnet50_2, resnet18
+from de_resnet import de_wide_resnet50_2, de_resnet18
+from test import evaluation_ATTA
 
 
-
-def test_mvtec(_class_):
+def test_mvtec(_class_, epoch, backbone, image_size):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Class: ', _class_)
     data_transform, gt_transform = get_data_transforms(256, 256)
 
-    #load data
-    test_path_id = './mvtec/' + _class_ #update here
-    test_path_brightness = './mvtec_brightness/' + _class_ #update here
-    test_path_constrast = './mvtec_contrast/' + _class_ #update here
-    test_path_defocus_blur = './mvtec_defocus_blur/' + _class_ #update here
-    test_path_gaussian_noise = './mvtec_gaussian_noise/' + _class_ #update here
-    ckp_path = './checkpoints/' + 'mvtec_DINL_' + str(_class_) + '_19.pth'
-    test_data_id = MVTecDataset(root=test_path_id, transform=data_transform, gt_transform=gt_transform,
-                             phase="test")
-    test_data_brightness = MVTecDatasetOOD(root=test_path_brightness, transform=data_transform, gt_transform=gt_transform,
-                             phase="test", _class_=_class_)
-    test_data_constrast = MVTecDatasetOOD(root=test_path_constrast, transform=data_transform, gt_transform=gt_transform,
-                             phase="test", _class_=_class_)
-    test_data_defocus_blur = MVTecDatasetOOD(root=test_path_defocus_blur, transform=data_transform, gt_transform=gt_transform,
-                             phase="test", _class_=_class_)
-    test_data_gaussian_noise = MVTecDatasetOOD(root=test_path_gaussian_noise, transform=data_transform, gt_transform=gt_transform,
-                             phase="test", _class_=_class_)
+    # load data
+    test_data1 = MVTEC(root='./mvtec_anomaly_detection', train=False, transform=data_transform, category=_class_,
+                       resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
+                       shrink_factor=1)
+    test_data2 = MVTEC(root='./mvtec_anomaly_detection', train=False, transform=data_transform, category=_class_,
+                       resize=image_size, use_imagenet=True, select_random_image_from_imagenet=True,
+                       shrink_factor=0.9)
 
-    test_dataloader_id = torch.utils.data.DataLoader(test_data_id, batch_size=1, shuffle=False)
-    test_dataloader_brightness = torch.utils.data.DataLoader(test_data_brightness, batch_size=1, shuffle=False)
-    test_dataloader_constrast = torch.utils.data.DataLoader(test_data_constrast, batch_size=1, shuffle=False)
-    test_dataloader_defocus_blur = torch.utils.data.DataLoader(test_data_defocus_blur, batch_size=1, shuffle=False)
-    test_dataloader_gaussian_noise = torch.utils.data.DataLoader(test_data_gaussian_noise, batch_size=1, shuffle=False)
+    test_dataloader1 = torch.utils.data.DataLoader(test_data1, batch_size=1, shuffle=False)
+    test_dataloader2 = torch.utils.data.DataLoader(test_data2, batch_size=1, shuffle=False)
 
-    #load model
-    encoder, bn = wide_resnet50_2(pretrained=True)
+    # load model
+    if backbone == 'wide':
+        encoder, bn = wide_resnet50_2(pretrained=True)
+        decoder = de_wide_resnet50_2(pretrained=False)
+    elif backbone == 'res18':
+        encoder, bn = resnet18(pretrained=True)
+        decoder = de_resnet18(pretrained=False)
+    else:
+        raise NotImplementedError()
+
     encoder = encoder.to(device)
     bn = bn.to(device)
     encoder.eval()
-    decoder = de_wide_resnet50_2(pretrained=False)
+
     decoder = decoder.to(device)
 
-    #load checkpoint
+    # load checkpoint
+    ckp_path = './checkpoints/' + 'mvtec_DINL_' + str(_class_) + f'_{epoch - 1}.pth'
     ckp = torch.load(ckp_path)
     for k, v in list(ckp['bn'].items()):
         if 'memory' in k:
@@ -55,46 +52,34 @@ def test_mvtec(_class_):
     lamda = 0.5
 
     list_results = []
-    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader_id, device,
-                                               type_of_test='EFDM_test',
-                                               img_size=256, lamda=lamda, dataset_name='mvtec', _class_=_class_)
+    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader1, device,
+                               type_of_test='EFDM_test',
+                               img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
     list_results.append(round(auroc_sp, 4))
-    print('Auroc of ID data{:.4f}'.format(auroc_sp))
+    print('main Auroc{:.4f}'.format(auroc_sp))
 
-    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader_brightness, device,
-                                               type_of_test='EFDM_test',
-                                               img_size=256, lamda=lamda, dataset_name='mvtec', _class_=_class_)
+    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader2, device,
+                               type_of_test='EFDM_test',
+                               img_size=image_size, lamda=lamda, dataset_name='mvtec', _class_=_class_)
     list_results.append(round(auroc_sp, 4))
-    print('Auroc of brightness data{:.4f}'.format(auroc_sp))
-
-    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader_constrast, device,
-                                               type_of_test='EFDM_test',
-                                               img_size=256, lamda=lamda, dataset_name='mvtec', _class_=_class_)
-    list_results.append(round(auroc_sp, 4))
-    print('Auroc of contrast data{:.4f}'.format(auroc_sp))
-
-    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader_defocus_blur, device,
-                                               type_of_test='EFDM_test',
-                                               img_size=256, lamda=lamda, dataset_name='mvtec', _class_=_class_)
-    list_results.append(round(auroc_sp, 4))
-    print('Auroc of defocus blur data{:.4f}'.format(auroc_sp))
-
-    auroc_sp = evaluation_ATTA(encoder, bn, decoder, test_dataloader_gaussian_noise, device,
-                                               type_of_test='EFDM_test',
-                                               img_size=256, lamda=lamda, dataset_name='mvtec', _class_=_class_)
-    list_results.append(round(auroc_sp, 4))
-    print('Auroc of Gaussian noise data{:.4f}'.format(auroc_sp))
+    print('shifted Auroc{:.4f}'.format(auroc_sp))
 
     print(list_results)
 
     return
 
+
 item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
              'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
 
 for i in item_list:
-    test_mvtec(i)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--image_size', type=int, default=256)
+    parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
+
+    args = parser.parse_args()
+    test_mvtec(i, args.epochs, args.backbone, args.image_size)
     print('===============================================')
     print('')
     print('')
-
