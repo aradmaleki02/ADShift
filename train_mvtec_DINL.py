@@ -6,6 +6,7 @@ from torch.nn import functional as F
 import torchvision.transforms as transforms
 from dataset import AugMixDatasetMVTec
 import argparse
+from tqdm import tqdm
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -56,7 +57,7 @@ def loss_concat(a, b):
     return loss
 
 
-def train(_class_, backbone, batch_size):
+def train(_class_, backbone, batch_size, epochs):
     print(_class_)
     epochs = 20
     learning_rate = 0.005
@@ -102,7 +103,7 @@ def train(_class_, backbone, batch_size):
 
 
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
         bn.train()
         decoder.train()
         loss_list = []
@@ -149,6 +150,7 @@ def train(_class_, backbone, batch_size):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--backbone', type=str, choices=['wide', 'res18'], default='wide')
 
     args = parser.parse_args()
@@ -156,4 +158,4 @@ if __name__ == '__main__':
     item_list = ['carpet', 'leather', 'grid', 'tile', 'wood', 'bottle', 'hazelnut', 'cable', 'capsule',
                   'pill', 'transistor', 'metal_nut', 'screw', 'toothbrush', 'zipper']
     for i in item_list:
-        train(i, args.backbone, args.batch_size)
+        train(i, args.backbone, args.batch_size, args.epochs)
