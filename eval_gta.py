@@ -78,7 +78,7 @@ class GTA_Test(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image, self.labels[index]
+        return image, 1, self.labels[index], 0
 
     def __len__(self):
         return len(self.image_files)
