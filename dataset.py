@@ -689,3 +689,36 @@ class Waterbird(torch.utils.data.Dataset):
             return img, 0
         else:
             return img, 1, self.labels[idx], 0
+
+
+class APTOS(Dataset):
+    def __init__(self, image_path, labels, transform=None, train=True, count=-1):
+        self.transform = transform
+        self.image_files = image_path
+        self.labels = labels
+        self.train = train
+        if count != -1:
+            if count < len(self.image_files):
+                self.image_files = self.image_files[:count]
+                self.labels = self.labels[:count]
+            else:
+                t = len(self.image_files)
+                for i in range(count - t):
+                    self.image_files.append(random.choice(self.image_files[:t]))
+                    self.labels.append(random.choice(self.labels[:t]))
+
+    def __getitem__(self, index):
+        image_file = self.image_files[index]
+        image = Image.open(image_file)
+        image = image.convert('RGB')
+        if self.transform is not None:
+            image = self.transform(image)
+
+        if self.train:
+            return image, 0
+        return image, 0, self.labels[index], 0
+
+
+
+    def __len__(self):
+        return len(self.image_files)
