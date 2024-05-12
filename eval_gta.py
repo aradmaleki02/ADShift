@@ -39,7 +39,7 @@ def get_gta_globs():
         ood_path = f'/kaggle/input/gta5-15-5-{nums[i]}/gta5_{i}/gta5_{i}/OOD/*'
         globs_id.append(glob(id_path))
         globs_ood.append(glob(ood_path))
-        print(i, len(globs_id[-1]), len(globs_ood[-1]))
+        # print(i, len(globs_id[-1]), len(globs_ood[-1]))
 
     glob_id = []
     glob_ood = []
