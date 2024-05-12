@@ -75,6 +75,10 @@ def evaluation_ATTA(encoder, bn, decoder, dataloader,device, type_of_test, img_s
         link_to_normal_sample = '/kaggle/input/aptos-dataset/APTOS/train/NORMAL/002c21358ce6.png'
         normal_image = Image.open(link_to_normal_sample).convert('RGB')
 
+    if dataset_name == 'gta':
+        link_to_normal_sample = '/kaggle/input/cityscapes-5-10-threshold/cityscapes/ID/aachen_000001_000019_leftImg8bit.png'
+        normal_image = Image.open(link_to_normal_sample).convert('RGB')
+
     if dataset_name == 'waterbirds':
         link_to_normal_sample = '/kaggle/input/waterbird/waterbird/004.Groove_billed_Ani/Groove_Billed_Ani_0068_1538.jpg'
         normal_image = Image.open(link_to_normal_sample).convert('RGB')
