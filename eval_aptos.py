@@ -34,8 +34,8 @@ def test_mvtec(_class_, epoch, backbone, image_size, cp_path):
     shifted_test_path = ["/kaggle/input/ddrdataset/DR_grading/DR_grading/" + s for s in shifted_test_path]
 
     # load data
-    test_data1 = APTOS(image_path=test_path, labels=test_label, transform=data_transform)
-    test_data2 = APTOS(image_path=shifted_test_path, labels=shifted_test_label, transform=data_transform)
+    test_data1 = APTOS(image_path=test_path, labels=test_label, transform=data_transform, train=False)
+    test_data2 = APTOS(image_path=shifted_test_path, labels=shifted_test_label, transform=data_transform, train=False)
 
     test_dataloader1 = torch.utils.data.DataLoader(test_data1, batch_size=1, shuffle=False)
     test_dataloader2 = torch.utils.data.DataLoader(test_data2, batch_size=1, shuffle=False)

@@ -93,7 +93,7 @@ def train(_class_, backbone, batch_size, epochs, save_step, image_size, cp_path)
     train_path = glob('/kaggle/input/aptos-dataset/APTOS/train/NORMAL/*')
     train_label = [0] * len(train_path)
 
-    train_data = APTOS(image_path=train_path, labels=train_label, transform=resize_transform)
+    train_data = APTOS(image_path=train_path, labels=train_label, transform=resize_transform, train=True)
 
     train_data = AugMixDatasetMVTec(train_data, preprocess)
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
