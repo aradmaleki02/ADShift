@@ -13,6 +13,7 @@ from os import listdir
 from torchvision import transforms
 import torch
 
+from dataset import MNIST_Dataset
 
 
 def cal_anomaly_map(fs_list, ft_list, out_size=224, amap_mode='mul'):
@@ -82,6 +83,11 @@ def evaluation_ATTA(encoder, bn, decoder, dataloader,device, type_of_test, img_s
     if dataset_name == 'waterbirds':
         link_to_normal_sample = '/kaggle/input/waterbird/waterbird/004.Groove_billed_Ani/Groove_Billed_Ani_0068_1538.jpg'
         normal_image = Image.open(link_to_normal_sample).convert('RGB')
+
+    if dataset_name == 'mn':
+        to_pil = transforms.ToPILImage()
+        train_data = MNIST_Dataset(train=True)
+        normal_image = to_pil(train_data[0])
 
     if dataset_name == 'PACS':
         labels_dict = {

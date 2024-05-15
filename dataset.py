@@ -1,3 +1,4 @@
+import pickle
 import shutil
 from pathlib import Path
 
@@ -516,6 +517,55 @@ class BrainTrain(torch.utils.data.Dataset):
         img = Image.open(img_path).convert('RGB')
         img = self.transform(img)
         return img, 0
+
+
+class MNIST_Dataset(Dataset):
+    def __init__(self, train, test_id=1, transform=None):
+        self.transform = transform
+        self.train = train
+        self.test_id = test_id
+        if train:
+            with open('/kaggle/input/diagvib-6-mnist-dataset/content/mnist_shifted_dataset/train_normal.pkl',
+                      'rb') as f:
+                normal_train = pickle.load(f)
+            self.images = normal_train['images']
+            self.labels = [0] * len(self.images)
+        else:
+            if test_id == 1:
+                with open('/kaggle/input/diagvib-6-mnist-dataset/content/mnist_shifted_dataset/test_normal_main.pkl',
+                          'rb') as f:
+                    normal_test = pickle.load(f)
+                with open('/kaggle/input/diagvib-6-mnist-dataset/content/mnist_shifted_dataset/test_abnormal_main.pkl',
+                          'rb') as f:
+                    abnormal_test = pickle.load(f)
+                self.images = normal_test['images'] + abnormal_test['images']
+                self.labels = [0] * len(normal_test['images']) + [1] * len(abnormal_test['images'])
+            else:
+                with open('/kaggle/input/diagvib-6-mnist-dataset/content/mnist_shifted_dataset/test_normal_shifted.pkl',
+                          'rb') as f:
+                    normal_test = pickle.load(f)
+                with open(
+                        '/kaggle/input/diagvib-6-mnist-dataset/content/mnist_shifted_dataset/test_abnormal_shifted.pkl',
+                        'rb') as f:
+                    abnormal_test = pickle.load(f)
+                self.images = normal_test['images'] + abnormal_test['images']
+                self.labels = [0] * len(normal_test['images']) + [1] * len(abnormal_test['images'])
+
+    def __getitem__(self, index):
+        image = torch.tensor(self.images[index])
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        height = image.shape[1]
+        width = image.shape[2]
+        target = 0 if self.train else self.labels[index]
+
+        return image, target
+
+    def __len__(self):
+        return len(self.images)
+
 
 
 class BrainTest(torch.utils.data.Dataset):
