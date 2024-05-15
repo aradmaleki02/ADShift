@@ -559,8 +559,6 @@ class MNIST_Dataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        height = image.shape[1]
-        width = image.shape[2]
         target = 0 if self.train else self.labels[index]
 
         return image, target
