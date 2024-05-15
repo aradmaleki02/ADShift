@@ -553,6 +553,8 @@ class MNIST_Dataset(Dataset):
 
     def __getitem__(self, index):
         image = torch.tensor(self.images[index])
+        to_pil = transforms.ToPILImage()
+        image = to_pil(image)
 
         if self.transform is not None:
             image = self.transform(image)
