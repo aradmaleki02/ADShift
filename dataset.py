@@ -560,8 +560,9 @@ class MNIST_Dataset(Dataset):
             image = self.transform(image)
 
         target = 0 if self.train else self.labels[index]
-
-        return image, target
+        if self.train:
+            return image, target
+        return image, 1, target, 0
 
     def __len__(self):
         return len(self.images)
