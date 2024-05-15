@@ -87,7 +87,7 @@ def evaluation_ATTA(encoder, bn, decoder, dataloader,device, type_of_test, img_s
     if dataset_name == 'mn':
         to_pil = transforms.ToPILImage()
         train_data = MNIST_Dataset(train=True)
-        normal_image = train_data[0]
+        normal_image = train_data[0][0]
 
     if dataset_name == 'PACS':
         labels_dict = {
